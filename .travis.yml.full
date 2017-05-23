@@ -1,0 +1,40 @@
+env:
+  global:
+  - secure: YIcRcJLemPREZuRhA1zG+aezvGkLa2jX19EcJxRPzS1Oka8qClM2abIXy1gKtkRMum6OdZCw1BPbV5rpM+LJy8nao3Q/4j1ND3qrp1lEW13nVIozmSQzueePNjhUb2BwwxqBf4XaXLkE7As7PTn8smCXrofVOLPRSDkzmNDVqaE=
+  - secure: Pa+Pwr7LAh3feXIpXDMScMfvCwNW5veR9df0Z4ti9GOeoiDW9nbDgJGuq9A5HbkvUElRM/q6h5pCs554cDHzflL2tn4ZmCJsYAMUTIUeEsB4w9w7xjj1icpFH+98Tq68uTmgoyeKXM0ItInCvdQX3uavm5x4L7PmNzpujK0pT+M=
+  phpenv:
+  - version-name: "5.5.10"
+
+language: php
+
+php:
+  - 5.5
+
+install:
+  - sudo apt-get update
+  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  # enable php-fpm
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  # configure apache virtual hosts
+  - sudo cp -f ci/travis/travis-ci-apache /etc/apache2/sites-available/default
+  - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
+  # add to .ini and restart
+  - phpenv config-add ci/travis/php.ini
+  - sudo service apache2 restart
+
+addons:
+  sauce_connect: true
+
+before_script:
+  - npm install -g se-interpreter
+  - mysql -e 'create database drupal;'
+  - mysql drupal < drupal.sql
+script:
+  - se-interpreter ci/travis/interpreter_config.json
+  - cat "error.log"
+  - curl http://localhost/index.php
+
+after_script:

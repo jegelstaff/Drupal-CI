@@ -5,18 +5,25 @@
   "steps": [
     {
       "type": "get",
-      "url": "https://www.drupal.org/"
+      "url": "https://xkcd.com/"
     },
     {
       "type": "clickElement",
       "locator": {
-        "type": "link text",
-        "value": "Support"
+        "type": "xpath",
+        "value": "//div[@id='middleContainer']//a[.='< Prev']"
+      }
+    },
+    {
+      "type": "clickElement",
+      "locator": {
+        "type": "xpath",
+        "value": "//div[@id='middleContainer']//a[.='< Prev']"
       }
     },
     {
       "type": "verifyTextPresent",
-      "text": "Get help with Drupal"
+      "text": "Machine Learning"
     }
   ],
   "data": {
